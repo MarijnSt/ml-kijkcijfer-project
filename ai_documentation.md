@@ -98,3 +98,30 @@ You might need to adjust the sleep times (1 second and 5 seconds) depending on t
 1. Increase the delay between requests
 2. Implement exponential backoff (increase wait time after each error)
 3. Check if the API has a documented rate limit and adjust accordingly
+
+## 2.2 Preparing ratings data
+* I selected the code block with the issue to add it as context to the chat window and pasted the error I got when running it*
+> invalid literal for int() with base 10: '971420,70'
+
+Ah, I see the issue. When you try to convert the string to an integer, it's failing because of the comma. We need to handle the decimal numbers properly. Here's how we can fix it:
+```
+# First remove dots and replace commas with dots for proper decimal handling
+ratings_df['Kijkers'] = ratings_df['Kijkers'].str.replace('.', '').str.replace(',', '.')
+
+# Convert to float first (to handle decimal numbers)
+ratings_df['Kijkers'] = pd.to_numeric(ratings_df['Kijkers'], errors='coerce')
+
+# Then convert to integer (this will round the decimal numbers)
+ratings_df['Kijkers'] = ratings_df['Kijkers'].astype(int)
+```
+This will:
+1. Remove the dots (thousand separators)
+2. Replace commas with dots (to handle decimal numbers properly)
+3. Convert to float first (which can handle decimal numbers)
+4. Finally convert to integer (which will round the decimal numbers)
+
+So numbers like:
+- "971.420,70" will become 971420.70 (float) and then 971421 (integer)
+- "836.931,30" will become 836931.30 (float) and then 836931 (integer)
+
+This should handle all the numeric values correctly, including those with decimal places. The errors='coerce' parameter will convert any non-numeric values to NaN, which you can then handle separately if needed.
