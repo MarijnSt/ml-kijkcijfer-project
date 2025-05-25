@@ -145,3 +145,40 @@ Both methods will give you the same result - a number between 1 and 53 represent
 * Week numbers range from 1 to 53
 
 Would you like me to explain more about how the week numbering works or help you with anything else?
+
+## 2.3 Getting sunrise and sunset data
+> I want to get historic and future sunrise and sunset data to add to this project. Do you know any open data platforms that provide this? Or other ways of getting this data?
+
+Yes, there are several ways to get sunrise and sunset data. Here are some of the best options:
+
+Astral Library (Recommended for Python)
+* A Python library that calculates sunrise/sunset times based on location
+* Very accurate and easy to use
+* Can calculate for any date (past or future)
+* No API key needed
+
+Sunrise-Sunset API
+* Free API with rate limits
+* Requires API key for higher usage
+* Historical and future data
+* Example endpoint: https://api.sunrise-sunset.org/json?lat=50.8503&lng=4.3517&date=2024-03-20
+
+Open-Meteo API
+* Free, no API key required
+* Provides sunrise/sunset data along with other weather data
+* Historical data available
+* Example endpoint: https://api.open-meteo.com/v1/forecast?latitude=50.8503&longitude=4.3517&daily=sunrise,sunset
+
+NOAA Solar Calculator
+* Very accurate calculations
+* Can be used programmatically
+* No API key needed
+* More complex to implement but very reliable
+
+For your project, I would recommend using the astral library because:
+* It's free and open source
+* No API key or rate limits
+* Can calculate for any date (past or future)
+* Very accurate
+* Easy to integrate with pandas
+* Works offline
