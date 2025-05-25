@@ -125,3 +125,23 @@ So numbers like:
 - "836.931,30" will become 836931.30 (float) and then 836931 (integer)
 
 This should handle all the numeric values correctly, including those with decimal places. The errors='coerce' parameter will convert any non-numeric values to NaN, which you can then handle separately if needed.
+
+---
+> How can I get the number of the week in the year? Similar to the day_of_week property above
+
+Based on the code you've shared, you're already using the correct method to get the week number of the year! The line:
+```
+ratings_df["Week"] = ratings_df["Datum"].dt.weekofyear
+```
+is exactly what you need. This method dt.weekofyear returns the week number (1-53) for each date in your datetime column.
+
+However, I should note that weekofyear is actually deprecated in newer versions of pandas. The recommended way to get the week number is to use `dt.isocalendar().week`. So if you want to update your code to use the more modern approach, you could write:
+```
+ratings_df["Week"] = ratings_df["Datum"].dt.isocalendar().week
+```
+Both methods will give you the same result - a number between 1 and 53 representing which week of the year the date falls in. The ISO calendar week numbering system is used, where:
+* Weeks start on Monday
+* Week 1 is the first week of the year that contains a Thursday
+* Week numbers range from 1 to 53
+
+Would you like me to explain more about how the week numbering works or help you with anything else?
