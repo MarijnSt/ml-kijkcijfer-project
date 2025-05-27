@@ -182,3 +182,66 @@ For your project, I would recommend using the astral library because:
 * Very accurate
 * Easy to integrate with pandas
 * Works offline
+
+# 3. Data ontdekken en visualiseren
+
+> I plotted histograms for these columns but i get some strange results for the weeks. Do you have an explanation for this?
+> I calculated the weeks value like this: data["Week"] = data["Datum"].dt.isocalendar().week
+
+Great question! Your code for calculating the week number is correct.
+
+However, the histogram for "Week" shows some strange spikes, especially at the beginning and around week 27. Here are some possible explanations:
+
+1. Partial Weeks at the Start and End of the Year
+    * The ISO week numbering system means that the first and last week of the year may not have a full 7 days.
+    * If your data starts or ends mid-week, those weeks will have fewer entries, but if you have multiple years, the first and last week of each year can accumulate more or fewer entries, causing spikes.
+
+2. Data Collection Gaps or Anomalies
+    * If there are missing dates or gaps in your data, some weeks may have more or fewer entries.
+    * If your data source sometimes skips days (e.g., holidays, technical issues), this can create uneven week distributions.
+
+3. Special Events or Outliers
+    * Certain weeks (like holidays, New Year, or special events) may have more broadcasts, causing spikes.
+    * For example, week 1 (New Year) and week 27 (mid-year, possibly summer holidays or special events) might have more or fewer programs.
+
+4. Incorrect Handling of Week Numbers
+    * If you have data from multiple years, but you only plot the week number (1–53) without considering the year, all years' week 1s are combined, all week 2s are combined, etc.
+    * This can create artificial spikes if some weeks are overrepresented across years.
+
+5. Data Duplication or Aggregation
+    * If your data is aggregated or duplicated for certain weeks, this can also cause spikes.
+
+> I did find some duplicates but the issue still remains. What would you suggest to investigate further?
+
+How to Investigate Further
+
+Check the distribution of dates per week and year:
+```
+print(data.groupby(['Year', 'Week']).size())
+```
+
+Plot a heatmap of counts per week and year:
+```
+  import seaborn as sns
+  week_year_counts = data.groupby(['Jaar', 'Week']).size().unstack(fill_value=0)
+  plt.figure(figsize=(15, 6))
+  sns.heatmap(week_year_counts, cmap="Blues")
+  plt.title("Number of entries per week and year")
+  plt.show()
+```
+
+> Could it be because I'm dividing the data in 50 bins but we have more weeks?
+
+Yes, that's a very good observation! The number of bins in your histogram can significantly affect how the data is visualized, especially for discrete variables like week numbers.
+* There are up to 53 weeks in a year (ISO weeks).
+* If you use bins=50, some bins will contain more than one week, and some weeks may be grouped together or split across bins.
+* This can create artificial spikes or dips in your histogram, making the distribution look strange or misleading.
+
+For discrete data like weeks, it's best to set the number of bins equal to the number of unique values:
+```
+data["Week"].hist(bins=data["Week"].nunique())
+plt.title("Week Distribution")
+plt.xlabel("Week")
+plt.ylabel("Count")
+plt.show()
+```
