@@ -245,3 +245,139 @@ plt.xlabel("Week")
 plt.ylabel("Count")
 plt.show()
 ```
+
+# 4. Data voorbereiden voor modellen
+
+/
+
+# 5. Modellen testen
+
+> I have this regressorlist that i will run with (mostly) default parameters to see which one performs best and which one i can further finetune. Do you have any suggestions for other models that i can add?
+
+1. Gradient Boosting Regressor (GBR)
+- Often performs very well on structured data
+- Good balance between performance and interpretability
+- Can handle non-linear relationships
+
+2. XGBoost Regressor
+- One of the most powerful gradient boosting implementations
+- Excellent performance on many regression tasks
+- Has built-in regularization
+
+3. LightGBM Regressor
+- Another efficient gradient boosting framework
+- Often faster than XGBoost
+- Good for large datasets
+
+4. Elastic Net
+- Combines L1 and L2 regularization
+- Good for datasets with many features
+- Can handle multicollinearity
+
+5. Kernel Ridge Regression
+- Good for non-linear relationships
+- More stable than SVR in some cases
+- Less sensitive to hyperparameters
+
+Here's how you could add these to your regressor list:
+...
+
+A few notes:
+1. You'll need to install additional packages for XGBoost and LightGBM:
+...
+
+2. For the imports, you'll need to add:
+...
+
+3. These models are added with their default parameters, but they all have extensive hyperparameter tuning possibilities if you find they perform well in your initial comparison.
+4. If you're working with a large dataset, you might want to start with a subset of these models first, as some (like XGBoost and LightGBM) can be computationally intensive.
+
+# 6. Model finetunen
+
+> If I find that a stacking regressor works best. Do I need to run a gridsearch for each model to find the best parameters? And what for the final estimator? I can't really emulate the data it will receive?
+
+This is a great question about hyperparameter tuning for StackingRegressor! Let me explain the best approach:
+
+1. For Base Models:
+- Yes, you should perform GridSearchCV for each base model individually first
+- This is because the base models need to be well-tuned to provide good predictions for the meta-learner
+- You can use cross-validation to find the best parameters for each model separately
+
+2. For the Final Estimator (Meta-learner):
+- You don't need to emulate the data it will receive
+- The meta-learner will receive the cross-validated predictions from the base models
+- You can still perform GridSearchCV on the final estimator, but you'll need to do it as part of the StackingRegressor
+
+Here's an example of how you could implement this:
+...
+
+Some important points to note:
+1. Cross-validation in StackingRegressor:
+- The cv parameter in StackingRegressor ensures that the meta-learner doesn't see the same data that was used to train the base models
+- This prevents data leakage and overfitting
+
+2. Final Estimator Choices:
+- Common choices for the final estimator include:
+    - LinearRegression (simple, interpretable)
+    - Ridge or Lasso (if you want regularization)
+    - ElasticNet (combines L1 and L2 regularization)
+    - LightGBM or XGBoost (if you want more complex relationships)
+
+3. Computational Considerations:
+- This approach can be computationally expensive
+- You might want to start with a smaller parameter grid
+- Consider using RandomizedSearchCV instead of GridSearchCV for faster results
+
+4. Best Practices:
+- Use the same cross-validation strategy throughout
+- Make sure to use the same scoring metric consistently
+- Consider using a validation set to evaluate the final model
+
+---
+
+> Can you think of any other parameters i could set to improve this model?
+
+Yes, there are several important Random Forest parameters that could help improve the model's performance. Here's an expanded parameter grid with additional parameters and their explanations:
+
+Key additions and explanations:
+1. min_samples_leaf:
+- Controls the minimum number of samples required to be at a leaf node
+- Higher values can help prevent overfitting
+- Useful when you have noisy data
+
+2. max_features:
+- Controls how many features are considered for the best split
+- 'sqrt' and 'log2' are common choices that can help prevent overfitting
+- None means all features are considered
+
+3. max_samples:
+- Only applicable when bootstrap=True
+- Controls the size of the bootstrap samples
+- Can help with overfitting by using smaller subsets
+
+4. min_weight_fraction_leaf:
+- Similar to min_samples_leaf but works with sample weights
+- Useful when you want to give more importance to certain samples
+
+5. criterion:
+- Different splitting criteria can work better for different types of data
+- 'squared_error' is default and good for most cases
+- 'absolute_error' is more robust to outliers
+- 'poisson' is good for count data
+
+To make the search more efficient, you could also add early stopping to prevent overfitting:
+...
+
+> How does the oob_score help?
+
+The Out-of-Bag (OOB) score is a very useful feature of Random Forest that helps in several ways:
+1. Built-in Cross-Validation:
+- When Random Forest creates trees using bootstrap sampling, about 37% of the data is not used for training each tree (this is the "out-of-bag" data)
+- This OOB data can be used to evaluate the model without needing a separate validation set
+- It's like having built-in cross-validation without the computational cost
+
+2. Overfitting Detection:
+- You can compare the OOB score with the training score
+- If there's a large gap between them, it indicates overfitting
+- This helps you tune parameters like max_depth and min_samples_leaf
+
