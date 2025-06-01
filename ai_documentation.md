@@ -405,3 +405,32 @@ print(best_model.named_steps.keys())
 
 This will show you all the named steps in your pipeline, and you can use the correct name to access the column transformer.
 Would you like me to help you find the exact name of your column transformer step or explain any part of this in more detail?
+
+---
+
+> I tried to improve the best model i found in a grid search by boosting it. But when I compare the results my boosted model has a MAPE of 32.6% and my original model has a score of 16.9%
+> Is that big of a difference normal? Does it point to overfitting on the boosted model?
+
+Let me help analyze this situation. The significant difference in MAPE scores (32.6% vs 16.9%) is indeed concerning and suggests there might be issues with the boosted model. Let me explain why this might be happening:
+1. Overfitting Concerns:
+- The large increase in MAPE (almost doubling) strongly suggests overfitting
+- AdaBoost can be particularly prone to overfitting when:
+    - The base model (RandomForest in this case) is already complex
+    - The number of estimators is too high
+    - The data is noisy
+
+2. Potential Issues in Your Implementation:
+- You're using a RandomForest with 600 estimators as the base model, which is already quite complex
+- Then you're boosting it with 100 additional estimators
+- This creates a very complex model that might be learning noise in the training data
+
+3. Recommendations:
+- Try reducing the complexity of your base model first
+- Consider using a simpler base model like a DecisionTree with limited depth
+- Reduce the number of boosting iterations (n_estimators in AdaBoost)
+- You might want to try cross-validation to better understand the model's performance
+
+Here's a suggested modification to your code:
+...
+
+The fact that your original RandomForest model performed better suggests that the additional complexity from boosting wasn't beneficial in this case. This is not uncommon - sometimes simpler models can outperform more complex ones, especially when the underlying patterns in the data are relatively straightforward.
