@@ -381,3 +381,27 @@ The Out-of-Bag (OOB) score is a very useful feature of Random Forest that helps 
 - If there's a large gap between them, it indicates overfitting
 - This helps you tune parameters like max_depth and min_samples_leaf
 
+---
+
+> How can I get the feature names from a grid search model?
+
+To get the feature names from a GridSearchCV model, you'll need to access the best estimator and then get the feature names from the column transformer. Here's how you can do it:
+
+```
+# Assuming you have a GridSearchCV object named 'grid_search'
+best_model = grid_search.best_estimator_
+
+# If your model has a column transformer as part of the pipeline
+column_transformer = best_model.named_steps['columntransformer']  # or whatever name you gave to your column transformer step
+feature_names = column_transformer.get_feature_names_out()
+
+print("Feature names:", feature_names)
+```
+
+If you're using a pipeline, the exact name of the column transformer step might be different. You can check the available steps in your pipeline using:
+```
+print(best_model.named_steps.keys())
+```
+
+This will show you all the named steps in your pipeline, and you can use the correct name to access the column transformer.
+Would you like me to help you find the exact name of your column transformer step or explain any part of this in more detail?
