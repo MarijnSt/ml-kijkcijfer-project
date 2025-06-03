@@ -20,7 +20,7 @@ ratings_df = pd.read_csv(csv_file_location, sep=";")
 """
 
 # Datum omzetten in datetime
-ratings_df["Datum"] = pd.to_datetime(ratings_df["Datum"])
+ratings_df["Datum"] = pd.to_datetime(ratings_df["Datum"], format='%d/%m/%Y')
 
 # Start omzetten in datetime
 ratings_df["Start"] = pd.to_datetime(ratings_df["Start"], format='%H:%M:%S').dt.time
