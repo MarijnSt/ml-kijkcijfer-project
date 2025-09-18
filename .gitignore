@@ -1,3 +1,4 @@
 *.pkl
 .cache.*
 *.sqlite
+__pycache__/
