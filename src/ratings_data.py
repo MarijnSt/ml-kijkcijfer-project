@@ -56,6 +56,20 @@ def get_cim_tv_data(date, session):
         print(f"Error fetching data for {date}: {e}")
         return None
 
+def format_data(df):
+    """
+    Format the columns of the ratings dataframe.
+    """
+
+    # Convert 'datum' to datetime
+    df["datum"] = pd.to_datetime(df["datum"])
+
+    # Convert 'kijkers' to int (needs some fixing)
+    df["kijkers"] = df["kijkers"].str.replace(".", "").str.replace(",", ".").astype(float).astype(int)
+
+    return df
+    
+
 def get_ratings_data(start_date="2016-10-1", end_date="latest"):
     """
     Fetch ratings data from CIM TV API for a given date range.
@@ -120,10 +134,8 @@ def get_ratings_data(start_date="2016-10-1", end_date="latest"):
     if all_records:
         df = pd.DataFrame(all_records)
         print(f"\nTotal records collected: {len(df)}")
+        df = format_data(df)
         return df
     else:
         print("No data collected")
         return pd.DataFrame()
-
-# Usage example:
-# df = get_ratings_data("2024-01-01", "2024-01-07")
