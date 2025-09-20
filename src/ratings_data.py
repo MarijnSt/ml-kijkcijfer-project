@@ -94,7 +94,7 @@ def get_ratings_data(start_date="2016-10-1", end_date="latest"):
     # Convert string dates to datetime objects
     start_date = datetime.strptime(start_date, "%Y-%m-%d")
     if end_date == "latest":
-        end_date = datetime.now() - timedelta(days=2)
+        end_date = datetime.now() - timedelta(days=3)
     else:
         end_date = datetime.strptime(end_date, "%Y-%m-%d")
 
@@ -133,8 +133,14 @@ def get_ratings_data(start_date="2016-10-1", end_date="latest"):
     # Create DataFrame once at the end
     if all_records:
         df = pd.DataFrame(all_records)
-        print(f"\nTotal records collected: {len(df)}")
+        
+        # Format data
         df = format_data(df)
+        
+        # Drop rows with missing values
+        df = df.dropna()
+        
+        print(f"\nTotal records collected: {len(df)}")
         return df
     else:
         print("No data collected")
