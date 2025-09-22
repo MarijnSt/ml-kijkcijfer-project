@@ -56,16 +56,37 @@ def get_cim_tv_data(date, session):
         print(f"Error fetching data for {date}: {e}")
         return None
 
-def format_data(df):
+def format_data(ratings_df):
     """
     Format the columns of the ratings dataframe.
+
+    Parameters:
+    ----------
+    ratings_df: pandas.DataFrame
+        The ratings data in a DataFrame
+
+    Returns:
+    -------
+    df: pandas.DataFrame
+        The formatted ratings data in a DataFrame
     """
+    # Create a copy of df
+    df = ratings_df.copy()
 
     # Convert 'datum' to datetime
     df["datum"] = pd.to_datetime(df["datum"])
 
-    # Convert 'kijkers' to int (needs some fixing)
-    df["kijkers"] = df["kijkers"].str.replace(".", "").str.replace(",", ".").astype(float).astype(int)
+    # Replace 'kijkers' data dots and commas
+    df["kijkers"] = df["kijkers"].str.replace(".", "").str.replace(",", ".")
+
+    # Convert 'kijkers' to numeric (errors converted to NaN)
+    df["kijkers"] = pd.to_numeric(df["kijkers"], errors='coerce')
+
+    # Drop rows with faulty 'kijkers' data (NaN)
+    df = df.dropna(subset=['kijkers'])
+
+    # Convert 'kijkers' to int
+    df["kijkers"] = df["kijkers"].astype(int)
 
     return df
     
@@ -136,7 +157,7 @@ def get_ratings_data(start_date="2016-10-1", end_date="latest"):
         
         # Format data
         df = format_data(df)
-        
+
         # Drop rows with missing values
         df = df.dropna()
         
@@ -145,3 +166,19 @@ def get_ratings_data(start_date="2016-10-1", end_date="latest"):
     else:
         print("No data collected")
         return pd.DataFrame()
+
+def create_ratings_parquet():
+    """
+    Create a parquet file from the ratings data.
+    """
+
+    print("Creating ratings_data.parquet...")
+
+    df = get_ratings_data()
+    df.to_parquet("ratings_data.parquet")
+
+    print("ratings_data.parquet created at project root")
+
+
+if __name__ == "__main__":
+    create_ratings_parquet()
