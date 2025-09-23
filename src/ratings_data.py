@@ -42,12 +42,12 @@ def get_cim_tv_data(date, session):
         for record in ratings_data:
             # Keep only relevant columns and rename them
             processed_record = {
-                "programma": record.get("description"),
-                "zender": record.get("channel"),
-                "datum": record.get("dateDiff"),
+                "show": record.get("description"),
+                "channel": record.get("channel"),
+                "date": record.get("dateDiff"),
                 "start": record.get("startTime"),
-                "duur": record.get("rLength"),
-                "kijkers": record.get("rateInK"),
+                "duration": record.get("rLength"),
+                "viewers": record.get("rateInK"),
             }
             processed_records.append(processed_record)
 
@@ -91,7 +91,7 @@ def correct_start_times(ratings_df):
     # Process each faulty record individually
     for idx in faulty_indices:
         start_time = ratings_df.loc[idx, "start"]
-        original_date = ratings_df.loc[idx, "datum"]
+        original_date = ratings_df.loc[idx, "date"]
         
         if start_time.startswith("24:"):
             # Move to next day and convert 24:xx:xx to 00:xx:xx
@@ -106,12 +106,44 @@ def correct_start_times(ratings_df):
             print(f"Record {idx}: {original_date} {start_time} → {new_date.strftime('%Y-%m-%d')} {new_start_time}")
         
         # Update the corrected dataframe
-        ratings_df_corrected.loc[idx, "datum"] = new_date
+        ratings_df_corrected.loc[idx, "date"] = new_date
         ratings_df_corrected.loc[idx, "start"] = new_start_time
 
     print(f"\nCorrection complete! Updated {len(faulty_indices)} 'start' records.")
 
     return ratings_df_corrected
+
+def normalize_channel_names(ratings_df):
+    """
+    Channel names have changed over the years. This function normalizes the channel names.
+
+    Parameters:
+    ----------
+    ratings_df: pandas.DataFrame
+        The ratings data in a DataFrame
+
+    Returns:
+    -------
+    df: pandas.DataFrame
+        The normalized ratings data in a DataFrame
+    """
+    # Create a copy of df
+    df = ratings_df.copy()
+
+    # Normalize the channel names
+    df.loc[df["channel"].isin(["EEN", "VRT 1"]), "channel"] = "EEN"
+    df.loc[df["channel"].isin(["Canvas", "CANVAS", "VRT CANVAS"]), "channel"] = "CANVAS"
+    df.loc[df["channel"].isin(["KETNET", "OP 12"]), "channel"] = "KETNET"
+    df.loc[df["channel"].isin(["VIER", "PLAY4"]), "channel"] = "PLAY4"
+    df.loc[df["channel"].isin(["VIJF", "PLAY5"]), "channel"] = "PLAY5"
+    df.loc[df["channel"].isin(["ZES", "PLAY6"]), "channel"] = "PLAY6"
+    df.loc[df["channel"].isin(["Q2", "VTM2"]), "channel"] = "VTM2"
+    df.loc[df["channel"].isin(["VITAYA", "VTM3"]), "channel"] = "VTM3"
+    df.loc[df["channel"].isin(["CAZ", "VTM4"]), "channel"] = "VTM4"
+    df.loc[df["channel"].isin(["EEN,VTM,PLAY4", "EEN, VTM, PLAY", "VRT 1/VTM/Play4"]), "channel"] = "EEN"
+    df.loc[df["channel"].isin(["ELEVEN PRO LEAGUE 1 NL", "DAZN PRO LEAGUE 1 (NL)"]), "channel"] = "PRO LEAGUE 1"
+    
+    return df
 
 def format_data(ratings_df):
     """
@@ -130,30 +162,30 @@ def format_data(ratings_df):
     # Create a copy of df
     df = ratings_df.copy()
 
-    # Convert 'datum' to datetime
-    df["datum"] = pd.to_datetime(df["datum"])
+    # Convert 'date' to datetime
+    df["date"] = pd.to_datetime(df["date"])
 
     # Fix faulty 'start' values
     df = correct_start_times(df)
 
-    # Convert 'start' to time and combine with 'datum' to create proper datetime
+    # Convert 'start' to time and combine with 'date' to create proper datetime
     start_times = pd.to_datetime(df["start"], format='%H:%M:%S').dt.time
-    df["start"] = [pd.Timestamp.combine(d, t) for d, t in zip(df['datum'], start_times)]
+    df["start"] = [pd.Timestamp.combine(d, t) for d, t in zip(df['date'], start_times)]
 
-    # Convert 'duur' to timedelta
-    df["duur"] = pd.to_timedelta(df["duur"])
+    # Convert 'duration' to timedelta
+    df["duration"] = pd.to_timedelta(df["duration"])
 
     # Replace 'kijkers' data dots and commas
-    df["kijkers"] = df["kijkers"].str.replace(".", "").str.replace(",", ".")
+    df["viewers"] = df["viewers"].str.replace(".", "").str.replace(",", ".")
 
     # Convert 'kijkers' to numeric (errors converted to NaN)
-    df["kijkers"] = pd.to_numeric(df["kijkers"], errors='coerce')
+    df["viewers"] = pd.to_numeric(df["viewers"], errors='coerce')
 
     # Drop rows with faulty 'kijkers' data (NaN)
-    df = df.dropna(subset=['kijkers'])
+    df = df.dropna(subset=['viewers'])
 
     # Convert 'kijkers' to int
-    df["kijkers"] = df["kijkers"].astype(int)
+    df["viewers"] = df["viewers"].astype(int)
 
     return df
 
