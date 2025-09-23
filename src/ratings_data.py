@@ -1,3 +1,4 @@
+import requests
 import requests_cache
 from retry_requests import retry
 import pandas as pd
@@ -56,6 +57,62 @@ def get_cim_tv_data(date, session):
         print(f"Error fetching data for {date}: {e}")
         return None
 
+def correct_start_times(ratings_df):
+    """
+    Correct the dates of the ratings data.
+    Some records have a starting time of 24:xx:xx or 25:xx:xx with the wrong date. They should get moved to the next day.
+
+    Parameters:
+    ----------
+    ratings_df: pandas.DataFrame
+        The ratings data in a DataFrame
+
+    Returns:
+    -------
+    ratings_df_corrected: pandas.DataFrame
+        The corrected ratings data in a DataFrame
+
+    Example:
+    -------
+    >>> ratings_df_corrected = correct_start_times(ratings_df)
+    >>> ratings_df_corrected.head()
+    """
+    # Create a copy to avoid modifying the original during iteration
+    ratings_df_corrected = ratings_df.copy()
+
+    # Get indices of faulty records
+    faulty_indices = ratings_df[
+        ratings_df["start"].str.startswith("24:") | 
+        ratings_df["start"].str.startswith("25:")
+    ].index
+
+    print(f"Found {len(faulty_indices)} faulty 'start' records to correct")
+
+    # Process each faulty record individually
+    for idx in faulty_indices:
+        start_time = ratings_df.loc[idx, "start"]
+        original_date = ratings_df.loc[idx, "datum"]
+        
+        if start_time.startswith("24:"):
+            # Move to next day and convert 24:xx:xx to 00:xx:xx
+            new_date = pd.to_datetime(original_date) + pd.Timedelta(days=1)
+            new_start_time = start_time.replace("24:", "00:", 1)
+            print(f"Record {idx}: {original_date} {start_time} → {new_date.strftime('%Y-%m-%d')} {new_start_time}")
+            
+        elif start_time.startswith("25:"):
+            # Move to next day and convert 25:xx:xx to 01:xx:xx
+            new_date = pd.to_datetime(original_date) + pd.Timedelta(days=1)
+            new_start_time = start_time.replace("25:", "01:", 1)
+            print(f"Record {idx}: {original_date} {start_time} → {new_date.strftime('%Y-%m-%d')} {new_start_time}")
+        
+        # Update the corrected dataframe
+        ratings_df_corrected.loc[idx, "datum"] = new_date
+        ratings_df_corrected.loc[idx, "start"] = new_start_time
+
+    print(f"\nCorrection complete! Updated {len(faulty_indices)} 'start' records.")
+
+    return ratings_df_corrected
+
 def format_data(ratings_df):
     """
     Format the columns of the ratings dataframe.
@@ -76,6 +133,16 @@ def format_data(ratings_df):
     # Convert 'datum' to datetime
     df["datum"] = pd.to_datetime(df["datum"])
 
+    # Fix faulty 'start' values
+    df = correct_start_times(df)
+
+    # Convert 'start' to time and combine with 'datum' to create proper datetime
+    start_times = pd.to_datetime(df["start"], format='%H:%M:%S').dt.time
+    df["start"] = [pd.Timestamp.combine(d, t) for d, t in zip(df['datum'], start_times)]
+
+    # Convert 'duur' to timedelta
+    df["duur"] = pd.to_timedelta(df["duur"])
+
     # Replace 'kijkers' data dots and commas
     df["kijkers"] = df["kijkers"].str.replace(".", "").str.replace(",", ".")
 
@@ -89,7 +156,6 @@ def format_data(ratings_df):
     df["kijkers"] = df["kijkers"].astype(int)
 
     return df
-    
 
 def get_ratings_data(start_date="2016-10-1", end_date="latest"):
     """
@@ -172,12 +238,13 @@ def create_ratings_parquet():
     Create a parquet file from the ratings data.
     """
 
-    print("Creating ratings_data.parquet...")
+    file_name = "ratings_data_test.parquet"
 
-    df = get_ratings_data()
-    df.to_parquet("ratings_data.parquet")
+    print(f"Creating {file_name}...")
+    df = get_ratings_data("2017-12-31", "2018-1-1")
+    df.to_parquet(file_name)
 
-    print("ratings_data.parquet created at project root")
+    print(f"{file_name} created at project root")
 
 
 if __name__ == "__main__":
