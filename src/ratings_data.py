@@ -168,8 +168,13 @@ def format_data(ratings_df):
     # Fix faulty 'start' values
     df = correct_start_times(df)
 
-    # Convert 'start' to time and combine with 'date' to create proper datetime
-    start_times = pd.to_datetime(df["start"], format='%H:%M:%S').dt.time
+    # Convert 'start' to datetime and convert errors to NaT
+    start_times = pd.to_datetime(df["start"], format='%H:%M:%S', errors='coerce').dt.time
+
+    # Drop rows with NaT 'start' values
+    df = df.dropna(subset=['start'])
+
+    # Combine 'start with 'date' to create proper datetime
     df["start"] = [pd.Timestamp.combine(d, t) for d, t in zip(df['date'], start_times)]
 
     # Convert 'duration' to timedelta
@@ -270,10 +275,10 @@ def create_ratings_parquet():
     Create a parquet file from the ratings data.
     """
 
-    file_name = "ratings_data_test.parquet"
+    file_name = "ratings_data.parquet"
 
     print(f"Creating {file_name}...")
-    df = get_ratings_data("2017-12-31", "2018-1-1")
+    df = get_ratings_data()
     df.to_parquet(file_name)
 
     print(f"{file_name} created at project root")
