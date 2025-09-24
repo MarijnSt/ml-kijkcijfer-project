@@ -169,13 +169,13 @@ def format_data(ratings_df):
     df = correct_start_times(df)
 
     # Convert 'start' to datetime and convert errors to NaT
-    start_times = pd.to_datetime(df["start"], format='%H:%M:%S', errors='coerce').dt.time
+    df["start"] = pd.to_datetime(df["start"], format='%H:%M:%S', errors='coerce')
 
     # Drop rows with NaT 'start' values
     df = df.dropna(subset=['start'])
 
     # Combine 'start with 'date' to create proper datetime
-    df["start"] = [pd.Timestamp.combine(d, t) for d, t in zip(df['date'], start_times)]
+    df["start"] = [pd.Timestamp.combine(d, t) for d, t in zip(df['date'], df["start"].dt.time)]
 
     # Convert 'duration' to timedelta
     df["duration"] = pd.to_timedelta(df["duration"])
