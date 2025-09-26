@@ -6,7 +6,7 @@ from .config import (
 
 from .data_sources import (
     CIMTVClient,
-    WeatherClient
+    # WeatherClient
 )
 from .extract import (
     fetch_ratings_data

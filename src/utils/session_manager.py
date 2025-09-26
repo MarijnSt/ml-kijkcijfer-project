@@ -2,7 +2,7 @@
 
 import requests_cache
 from retry_requests import retry
-from ..config.settings import config
+from ..config.settings import CACHE_DIR, CACHE_EXPIRE_AFTER
 
 
 class SessionManager:
@@ -19,7 +19,7 @@ class SessionManager:
         
         Parameters
         ----------
-        api_config : APIConfig
+        api_config : dict
             API configuration object containing retry and cache settings
         """
         self.api_config = api_config
@@ -37,13 +37,13 @@ class SessionManager:
         """
         if self._session is None:
             cache_session = requests_cache.CachedSession(
-                config.cache.cache_dir, 
-                expire_after=config.cache.expire_after
+                CACHE_DIR, 
+                expire_after=CACHE_EXPIRE_AFTER
             )
             self._session = retry(
                 cache_session, 
-                retries=self.api_config.retry_count,
-                backoff_factor=self.api_config.backoff_factor
+                retries=self.api_config['retry_count'],
+                backoff_factor=self.api_config['backoff_factor']
             )
         return self._session
     

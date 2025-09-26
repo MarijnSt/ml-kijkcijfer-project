@@ -5,7 +5,7 @@ from datetime import datetime
 import time
 import logging
 
-from ..config.settings import config
+from ..config.settings import CIM_TV_API, DATE_FORMAT
 from ..utils.exceptions import APIError, ValidationError
 from ..utils.session_manager import SessionManager
 
@@ -23,7 +23,7 @@ class CIMTVClient:
     
     def __init__(self):
         """Initialize CIM TV client with configuration."""
-        self.config = config.cim_tv
+        self.config = CIM_TV_API
         self.session_manager = SessionManager(self.config)
     
     def get_data(self, date: str) -> Optional[List[Dict[str, Any]]]:
@@ -49,12 +49,12 @@ class CIMTVClient:
         """
         # Validate the date format
         try:
-            datetime.strptime(date, config.data.api_date_format)
+            datetime.strptime(date, DATE_FORMAT)
         except ValueError:
             raise ValidationError(f"Invalid date format: {date}. Expected format: YYYY-M-D")
 
         # Construct the API URL
-        api_url = f"{self.config.base_url}?dateDiff={date}&reportType=north"
+        api_url = f"{self.config['base_url']}?dateDiff={date}&reportType=north"
         logger.info(f"Fetching data from API for date: {date}")
 
         try:

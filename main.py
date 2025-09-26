@@ -1,16 +1,13 @@
 """Main script for data collection and file operations."""
 
-import logging
 from pathlib import Path
 
-from .config.logging_config import setup_logging
-from .extract.ratings_data import fetch_ratings_data
-from .load.load_to_parquet import save_parquet
-
+from src.config.logging_config import setup_logging
+from src.extract.ratings_data import fetch_ratings_data
+from src.load.load_to_parquet import save_parquet
 
 # Set up logging
 logger = setup_logging()
-
 
 def main():
     """
