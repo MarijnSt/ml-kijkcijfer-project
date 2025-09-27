@@ -6,10 +6,11 @@ from .config import (
 
 from .data_sources import (
     CIMTVClient,
-    # WeatherClient
+    WeatherClient
 )
 from .extract import (
-    fetch_ratings_data
+    fetch_ratings_data,
+    fetch_weather_data
 )
 from .load import (
     save_parquet
@@ -18,7 +19,7 @@ from .transform import (
     RatingsTransformer
 )
 from .utils import (
-    RatingsDataError,
+    DataError,
     APIError, 
     DataProcessingError,
     ValidationError,
@@ -35,6 +36,7 @@ __all__ = [
 
     # Extract
     "fetch_ratings_data",
+    "fetch_weather_data",
     
     # Load
     "save_parquet",
@@ -43,7 +45,7 @@ __all__ = [
     "RatingsTransformer",
     
     # Utils
-    "RatingsDataError",
+    "DataError",
     "APIError", 
     "DataProcessingError",
     "ValidationError",

@@ -39,7 +39,7 @@ def fetch_ratings_data(
         If the data processing fails
     """
 
-    # Set start and end date.Use config defaults if not provided
+    # Set start and end date. Use config defaults if not provided
     start_date = start_date or DEFAULT_START_DATE
     end_date = end_date or "latest"
 

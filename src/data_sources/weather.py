@@ -7,8 +7,8 @@ import logging
 import openmeteo_requests
 import pandas as pd
 
-from ..config.settings import config
-from ..utils.exceptions import APIError, ValidationError
+from ..config.settings import WEATHER_API, WEATHER_LOCATION, WEATHER_VARIABLES, DATE_FORMAT
+from ..utils.exceptions import APIError, ValidationError, ValidationError
 from ..utils.session_manager import SessionManager
 
 
@@ -25,10 +25,10 @@ class WeatherClient:
     
     def __init__(self):
         """Initialize weather client with configuration."""
-        self.config = config.weather
+        self.config = WEATHER_API
         self.session_manager = SessionManager(self.config)
-        self.location = config.weather_location
-        self.variables = config.weather_variables
+        self.location = WEATHER_LOCATION
+        self.variables = WEATHER_VARIABLES
     
     def get_historical_data(self, start_date: str, end_date: str) -> Optional[pd.DataFrame]:
         """
@@ -57,8 +57,8 @@ class WeatherClient:
         """
         # Validate date formats
         try:
-            datetime.strptime(start_date, config.data.date_format)
-            datetime.strptime(end_date, config.data.date_format)
+            datetime.strptime(start_date, DATE_FORMAT)
+            datetime.strptime(end_date, DATE_FORMAT)
         except ValueError as e:
             raise ValidationError(f"Invalid date format. Expected format: YYYY-MM-DD") from e
 
@@ -66,7 +66,7 @@ class WeatherClient:
 
         try:
             # Setup the Open-Meteo API client
-            openmeteo = openmeteo_requests.Client(session=self.session_manager.session)
+            openmeteo = openmeteo_requests.Client(session = self.session_manager.session)
 
             # Prepare API parameters
             params = {
@@ -78,7 +78,7 @@ class WeatherClient:
             }
 
             # Make API request
-            responses = openmeteo.weather_api(self.config.base_url, params=params)
+            responses = openmeteo.weather_api(self.config["base_url"], params=params)
             response = responses[0]
 
             # Process daily data

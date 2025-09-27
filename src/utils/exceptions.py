@@ -1,21 +1,21 @@
 """Custom exceptions for the ML Kijkcijfer project."""
 
 
-class RatingsDataError(Exception):
-    """Base exception for ratings data operations."""
+class DataError(Exception):
+    """Base exception for data operations."""
     pass
 
 
-class APIError(RatingsDataError):
+class APIError(DataError):
     """Exception raised when API requests fail."""
     pass
 
 
-class DataProcessingError(RatingsDataError):
+class DataProcessingError(DataError):
     """Exception raised when data processing fails."""
     pass
 
 
-class ValidationError(RatingsDataError):
+class ValidationError(DataError):
     """Exception raised when data validation fails."""
     pass

@@ -1,7 +1,7 @@
 """Utility functions and classes."""
 
 from .exceptions import (
-    RatingsDataError,
+    DataError,
     APIError, 
     DataProcessingError,
     ValidationError
@@ -9,7 +9,7 @@ from .exceptions import (
 from .session_manager import SessionManager
 
 __all__ = [
-    'RatingsDataError',
+    'DataError',
     'APIError', 
     'DataProcessingError',
     'ValidationError',
