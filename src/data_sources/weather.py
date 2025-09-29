@@ -30,6 +30,7 @@ class WeatherClient:
         self.location = WEATHER_LOCATION
         self.variables = WEATHER_VARIABLES
 
+
     def validate_date(self, date: str) -> None:
         """
         Validate the date.
@@ -49,6 +50,7 @@ class WeatherClient:
         except ValueError as e:
             raise ValidationError(f"Invalid date: {date}. Expected format: YYYY-MM-DD") from e
     
+
     def _fetch_weather_data(
         self, 
         start_date: str, 
@@ -84,8 +86,6 @@ class WeatherClient:
         # Validate date formats
         self.validate_date(start_date)
         self.validate_date(end_date)
-
-        logger.info(f"Fetching historical weather data from {start_date} to {end_date}")
 
         try:
             # Setup the Open-Meteo API client
@@ -138,14 +138,20 @@ class WeatherClient:
             logger.error(error_message)
             raise APIError(error_message) from e
 
+
     def get_historical_data(self, start_date: str, end_date: str) -> Optional[pd.DataFrame]:
         """
         Get historical weather data from the Open-Meteo API.
         """
+        logger.info(f"Fetching historical weather data from {start_date} to {end_date}")
+        
         return self._fetch_weather_data(start_date, end_date, self.config["base_url_historical"])
+
 
     def get_forecast_data(self, start_date: str, end_date: str) -> Optional[pd.DataFrame]:
         """
         Get forecast weather data from the Open-Meteo API.
         """
+        logger.info(f"Fetching forecast weather data from {start_date} to {end_date}")
+        
         return self._fetch_weather_data(start_date, end_date, self.config["base_url_forecast"])

@@ -1,16 +1,47 @@
 import pandas as pd
 import logging
+from datetime import datetime
 
-from ..config.settings import DEFAULT_START_DATE
+from ..config.settings import DEFAULT_START_DATE, DATE_FORMAT
 from ..utils.exceptions import DataProcessingError, ValidationError
 from ..data_sources import WeatherClient
 
 logger = logging.getLogger(__name__)
 
+def _determine_data_type(start_date: str) -> str:
+    """
+    Determine if we are fetching historical or forecast data.
+
+    Parameters:
+    ----------
+    start_date: str
+        The start date of the date range (format: YYYY-MM-DD)
+
+    Returns:
+    -------
+    str
+        The type of data to fetch (historical or forecast)
+
+    Raises:
+    -------
+    ValidationError
+        If the date format is invalid
+    """
+    today = datetime.now().date()
+
+    try:
+        start_date_parsed = datetime.strptime(start_date, DATE_FORMAT).date()
+        if start_date_parsed > today:
+            return "forecast"
+        else:
+            return "historical"
+            
+    except ValueError as e:
+        raise ValidationError(f"Invalid start date format: {start_date}. Expected format: YYYY-MM-DD") from e
+
 def fetch_weather_data(
     start_date: str = None, 
     end_date: str = None,
-    data_type: str = "historical"
 ) -> pd.DataFrame:
     """
     Fetch weather data from the Open-Meteo API.
@@ -21,8 +52,6 @@ def fetch_weather_data(
         The start date of the date range (format: YYYY-MM-DD)
     end_date: str
         The end date of the date range (format: YYYY-MM-DD)
-    data_type: str
-        The type of data to fetch (historical or forecast)
 
     Returns:
     -------
@@ -41,6 +70,9 @@ def fetch_weather_data(
     start_date = start_date or DEFAULT_START_DATE
     end_date = end_date or "latest"
 
+    # Determine if we are fetching historical or forecast data
+    data_type = _determine_data_type(start_date)
+
     logger.info(f"Fetching weather data from {start_date} to {end_date}")
 
     try:
@@ -51,10 +83,8 @@ def fetch_weather_data(
         # Get data for date range
         if data_type == "historical":
             weather_data = weather_client.get_historical_data(start_date, end_date)
-        elif data_type == "forecast":
-            weather_data = weather_client.get_forecast_data(start_date, end_date)
         else:
-            raise ValidationError(f"Invalid data type: {data_type}. Must be 'historical' or 'forecast'")
+            weather_data = weather_client.get_forecast_data(start_date, end_date)
 
         logger.info(f"Weather data collection complete! Total records: {len(weather_data)}")
 
