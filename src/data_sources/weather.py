@@ -94,7 +94,11 @@ class WeatherClient:
 
             # Map variables to their data
             for i, var in enumerate(self.variables):
-                daily_data[var] = daily.Variables(i).ValuesAsNumpy()
+                # Handle sunrise and sunset (index 4 and 5)
+                if i == 4 or i == 5:
+                    daily_data[var] = daily.Variables(i).ValuesInt64AsNumpy()
+                else:
+                    daily_data[var] = daily.Variables(i).ValuesAsNumpy()
 
             # Add sunrise and sunset time columns
             if 'sunrise' in daily_data:

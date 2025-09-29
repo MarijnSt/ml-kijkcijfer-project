@@ -1,9 +1,8 @@
 import pandas as pd
 import logging
-from datetime import datetime, timedelta
 
-from ..config.settings import DEFAULT_START_DATE, DATE_FORMAT, LATEST_OFFSET_DAYS
-from ..utils.exceptions import DataProcessingError, ValidationError
+from ..config.settings import DEFAULT_START_DATE
+from ..utils.exceptions import DataProcessingError
 from ..data_sources import WeatherClient
 
 logger = logging.getLogger(__name__)
