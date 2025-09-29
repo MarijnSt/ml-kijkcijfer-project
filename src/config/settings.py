@@ -10,7 +10,8 @@ CIM_TV_API = {
 }
 
 WEATHER_API = {
-    "base_url": "https://archive-api.open-meteo.com/v1/archive",
+    "base_url_historical": "https://archive-api.open-meteo.com/v1/archive",
+    "base_url_forecast": "https://api.open-meteo.com/v1/forecast",
     "retry_count": 5,
     "backoff_factor": 0.2,
     "request_delay": 1.0,

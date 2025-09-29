@@ -29,10 +29,34 @@ class WeatherClient:
         self.session_manager = SessionManager(self.config)
         self.location = WEATHER_LOCATION
         self.variables = WEATHER_VARIABLES
-    
-    def get_historical_data(self, start_date: str, end_date: str) -> Optional[pd.DataFrame]:
+
+    def validate_date(self, date: str) -> None:
         """
-        Get historical weather data from the Open-Meteo API.
+        Validate the date.
+
+        Parameters
+        ----------
+        date : str
+            The date to validate (format: YYYY-MM-DD)
+
+        Raises
+        ------
+        ValidationError
+            If the date format is invalid
+        """
+        try:
+            datetime.strptime(date, DATE_FORMAT)
+        except ValueError as e:
+            raise ValidationError(f"Invalid date: {date}. Expected format: YYYY-MM-DD") from e
+    
+    def _fetch_weather_data(
+        self, 
+        start_date: str, 
+        end_date: str,
+        api_endpoint: str
+    ) -> Optional[pd.DataFrame]:
+        """
+        Get historical or forecastweather data from the Open-Meteo API.
         
         The location is fixed to Ukkel.
 
@@ -42,6 +66,8 @@ class WeatherClient:
             The start date of the weather data to get (format: YYYY-MM-DD)
         end_date : str
             The end date of the weather data to get (format: YYYY-MM-DD)
+        api_endpoint : str
+            The API endpoint to use (historical or forecast)
 
         Returns
         -------
@@ -56,13 +82,10 @@ class WeatherClient:
             If the date format is invalid
         """
         # Validate date formats
-        try:
-            datetime.strptime(start_date, DATE_FORMAT)
-            datetime.strptime(end_date, DATE_FORMAT)
-        except ValueError as e:
-            raise ValidationError(f"Invalid date format. Expected format: YYYY-MM-DD") from e
+        self.validate_date(start_date)
+        self.validate_date(end_date)
 
-        logger.info(f"Fetching weather data from {start_date} to {end_date}")
+        logger.info(f"Fetching historical weather data from {start_date} to {end_date}")
 
         try:
             # Setup the Open-Meteo API client
@@ -78,7 +101,7 @@ class WeatherClient:
             }
 
             # Make API request
-            responses = openmeteo.weather_api(self.config["base_url"], params=params)
+            responses = openmeteo.weather_api(api_endpoint, params=params)
             response = responses[0]
 
             # Process daily data
@@ -114,3 +137,15 @@ class WeatherClient:
             error_message = f"Error fetching weather data: {e}"
             logger.error(error_message)
             raise APIError(error_message) from e
+
+    def get_historical_data(self, start_date: str, end_date: str) -> Optional[pd.DataFrame]:
+        """
+        Get historical weather data from the Open-Meteo API.
+        """
+        return self._fetch_weather_data(start_date, end_date, self.config["base_url_historical"])
+
+    def get_forecast_data(self, start_date: str, end_date: str) -> Optional[pd.DataFrame]:
+        """
+        Get forecast weather data from the Open-Meteo API.
+        """
+        return self._fetch_weather_data(start_date, end_date, self.config["base_url_forecast"])

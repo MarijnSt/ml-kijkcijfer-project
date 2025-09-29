@@ -122,6 +122,6 @@ def fetch_ratings_data(
             return pd.DataFrame()
     
     except Exception as e:
-        error_message = f"Error getting ratings data: {e}"
+        error_message = f"Error getting ratings data. {e}"
         logger.error(error_message)
         raise DataProcessingError(error_message) from e

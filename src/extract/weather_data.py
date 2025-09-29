@@ -2,14 +2,15 @@ import pandas as pd
 import logging
 
 from ..config.settings import DEFAULT_START_DATE
-from ..utils.exceptions import DataProcessingError
+from ..utils.exceptions import DataProcessingError, ValidationError
 from ..data_sources import WeatherClient
 
 logger = logging.getLogger(__name__)
 
 def fetch_weather_data(
     start_date: str = None, 
-    end_date: str = None
+    end_date: str = None,
+    data_type: str = "historical"
 ) -> pd.DataFrame:
     """
     Fetch weather data from the Open-Meteo API.
@@ -20,6 +21,8 @@ def fetch_weather_data(
         The start date of the date range (format: YYYY-MM-DD)
     end_date: str
         The end date of the date range (format: YYYY-MM-DD)
+    data_type: str
+        The type of data to fetch (historical or forecast)
 
     Returns:
     -------
@@ -46,7 +49,12 @@ def fetch_weather_data(
         #weather_transformer = WeatherTransformer()
 
         # Get data for date range
-        weather_data = weather_client.get_historical_data(start_date, end_date)
+        if data_type == "historical":
+            weather_data = weather_client.get_historical_data(start_date, end_date)
+        elif data_type == "forecast":
+            weather_data = weather_client.get_forecast_data(start_date, end_date)
+        else:
+            raise ValidationError(f"Invalid data type: {data_type}. Must be 'historical' or 'forecast'")
 
         logger.info(f"Weather data collection complete! Total records: {len(weather_data)}")
 
@@ -61,6 +69,6 @@ def fetch_weather_data(
             return pd.DataFrame()
 
     except Exception as e:
-        error_message = f"Error fetching weather data: {e}"
+        error_message = f"Error fetching weather data. {e}"
         logger.error(error_message)
         raise DataProcessingError(error_message) from e
