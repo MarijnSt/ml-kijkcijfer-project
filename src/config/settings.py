@@ -23,7 +23,7 @@ CACHE_DIR = ".cache"
 CACHE_EXPIRE_AFTER = -1  # Never expire
 
 # Data Settings
-DEFAULT_START_DATE = "2016-10-1"
+DEFAULT_START_DATE = "2016-10-01"
 LATEST_OFFSET_DAYS = 2
 DATE_FORMAT = "%Y-%m-%d"
 API_DATE_FORMAT = "%Y-%-m-%-d"

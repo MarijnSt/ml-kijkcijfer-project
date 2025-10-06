@@ -17,28 +17,28 @@ def main():
     try:        
         # Collect ratings data
         logger.info("Starting data collection process...")
-        ratings_df = fetch_ratings_data("2025-01-01", "2025-01-03")
+        ratings_df = fetch_ratings_data()
         
         if ratings_df.empty:
             logger.warning("No data collected, exiting")
             return
         
         # Save to parquet
-        output_path = Path("data/ratings_data_test.parquet")
+        output_path = Path("data/ratings_data.parquet")
         save_parquet(ratings_df, output_path)
         
         logger.info("Data collection and saving completed successfully!")
 
         # Collect weather data
         logger.info("Starting weather data collection process...")
-        weather_df = fetch_weather_data("2025-01-01", "2025-01-03")
+        weather_df = fetch_weather_data()
         
         if weather_df.empty:
             logger.warning("No data collected, exiting")
             return
         
         # Save to parquet
-        output_path = Path("data/weather_data_test.parquet")
+        output_path = Path("data/weather_data.parquet")
         save_parquet(weather_df, output_path)
         
         logger.info("Data collection and saving completed successfully!")

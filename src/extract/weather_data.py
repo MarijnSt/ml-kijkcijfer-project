@@ -1,8 +1,8 @@
 import pandas as pd
 import logging
-from datetime import datetime
+from datetime import datetime, timedelta
 
-from ..config.settings import DEFAULT_START_DATE, DATE_FORMAT
+from ..config.settings import DEFAULT_START_DATE, DATE_FORMAT, LATEST_OFFSET_DAYS
 from ..utils.exceptions import DataProcessingError, ValidationError
 from ..data_sources import WeatherClient
 
@@ -79,6 +79,12 @@ def fetch_weather_data(
         # Initialize weather client and transformer
         weather_client = WeatherClient()
         #weather_transformer = WeatherTransformer()
+
+        # Convert end date if it is "latest"
+        if end_date == "latest":
+            end_date = datetime.now() - timedelta(days=LATEST_OFFSET_DAYS)
+            end_date = end_date.strftime(DATE_FORMAT)
+            logger.info(f"Using 'latest' end date: {end_date}")
 
         # Get data for date range
         if data_type == "historical":
