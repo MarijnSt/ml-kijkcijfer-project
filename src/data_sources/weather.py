@@ -125,9 +125,9 @@ class WeatherClient:
 
             # Add sunrise and sunset time columns
             if 'sunrise' in daily_data:
-                daily_data["sunrise_time"] = pd.to_datetime(daily_data['sunrise'], unit='s')
+                daily_data["sunrise_time"] = pd.to_datetime(daily_data['sunrise'], unit='s', utc=True).tz_convert("Europe/Brussels")
             if 'sunset' in daily_data:
-                daily_data["sunset_time"] = pd.to_datetime(daily_data['sunset'], unit='s')
+                daily_data["sunset_time"] = pd.to_datetime(daily_data['sunset'], unit='s', utc=True).tz_convert("Europe/Brussels")
 
             df = pd.DataFrame(data=daily_data)
             logger.info(f"Successfully processed {len(df)} weather records")
