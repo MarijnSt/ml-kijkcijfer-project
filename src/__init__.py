@@ -16,7 +16,8 @@ from .load import (
     save_parquet
 )
 from .transform import (
-    RatingsTransformer
+    RatingsTransformer,
+    WeatherTransformer
 )
 from .utils import (
     DataError,
@@ -43,6 +44,7 @@ __all__ = [
 
     # Transform
     "RatingsTransformer",
+    "WeatherTransformer",
     
     # Utils
     "DataError",

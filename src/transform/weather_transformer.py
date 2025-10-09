@@ -10,7 +10,7 @@ from ..utils.exceptions import DataProcessingError
 logger = logging.getLogger(__name__)
 
 
-class WeatherProcessor:
+class WeatherTransformer:
     """
     Processes and cleans weather data.
     
@@ -22,7 +22,7 @@ class WeatherProcessor:
         """Initialize weather processor."""
         pass
     
-    def format_weather_data(self, weather_df: pd.DataFrame) -> pd.DataFrame:
+    def format_data(self, weather_df: pd.DataFrame) -> pd.DataFrame:
         """
         Format the weather dataframe.
 
@@ -44,17 +44,15 @@ class WeatherProcessor:
         try:
             # Create a copy of df
             df = weather_df.copy()
-            original_count = len(df)
 
-            # Convert sunrise and sunset to datetime
+            # Add sunrise and sunset time columns
             if 'sunrise' in df.columns:
-                df['sunrise_time'] = pd.to_datetime(df['sunrise'], unit='s')
+                df["sunrise_time"] = pd.to_datetime(df['sunrise'], unit='s', utc=True).dt.tz_convert("Europe/Brussels")
             if 'sunset' in df.columns:
-                df['sunset_time'] = pd.to_datetime(df['sunset'], unit='s')
+                df["sunset_time"] = pd.to_datetime(df['sunset'], unit='s', utc=True).dt.tz_convert("Europe/Brussels")
 
-            # Ensure date column is datetime
-            if 'date' in df.columns:
-                df['date'] = pd.to_datetime(df['date'])
+            # Remove timezone from date column (used for merge)
+            df["date"] = df["date"].dt.tz_localize(None)
 
             logger.info(f"Weather data formatting complete! Processed {len(df)} records.")
             return df

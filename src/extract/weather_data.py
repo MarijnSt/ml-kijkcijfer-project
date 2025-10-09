@@ -5,6 +5,7 @@ from datetime import datetime, timedelta
 from ..config.settings import DEFAULT_START_DATE, DATE_FORMAT, LATEST_OFFSET_DAYS
 from ..utils.exceptions import DataProcessingError, ValidationError
 from ..data_sources import WeatherClient
+from ..transform import WeatherTransformer
 
 logger = logging.getLogger(__name__)
 
@@ -78,7 +79,7 @@ def fetch_weather_data(
     try:
         # Initialize weather client and transformer
         weather_client = WeatherClient()
-        #weather_transformer = WeatherTransformer()
+        weather_transformer = WeatherTransformer()
 
         # Convert end date if it is "latest"
         if end_date == "latest":
@@ -97,6 +98,9 @@ def fetch_weather_data(
         if not weather_data.empty:
             logger.info(f"Creating DataFrame from {len(weather_data)} records")
             df = pd.DataFrame(weather_data)
+
+            # Format data
+            df = weather_transformer.format_data(df)
             
             logger.info(f"Weather data collection complete! Total records: {len(df)}")
             return df

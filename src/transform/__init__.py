@@ -1,6 +1,9 @@
 """Data processing modules."""
 
 from .ratings_transformer import RatingsTransformer
-# TODO: weather transformer
+from .weather_transformer import WeatherTransformer
 
-__all__ = ['RatingsTransformer']
+__all__ = [
+    'RatingsTransformer', 
+    'WeatherTransformer'
+]
