@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 import logging
 from typing import Dict, Any
 
@@ -14,8 +15,24 @@ class DataTransformer:
     Includes:
     - Merging ratings and weather data
     - Feature engineering
-    - TODO: data formatting, ???
+    - Selecting features
     """
+    
+    # TODO: drop certain features based on feature importance
+    FEATURES_LIST = [
+        "show", "channel", "viewers",
+        "year", "month", "day_of_week", "week",
+        "covid_19", "lockdown_1", "lockdown_2",
+        "start_of_program_hour", "end_of_program_hour", "duration",
+        "in_primetime", "ends_in_primetime", "starts_in_primetime",
+        "has_commercials",
+        "sunrise_delta_start", "sunrise_delta_end", "sunset_delta_start", "sunset_delta_end",
+        "sunrise_time", "sunset_time",
+        "weather_code", "temperature_2m_mean", "temperature_2m_max", "temperature_2m_min",
+        "daylight_duration", "sunshine_duration", 
+        "precipitation_sum", "rain_sum", "snowfall_sum", "precipitation_hours", 
+        "wind_speed_10m_max", "wind_gusts_10m_max",
+    ]
 
     def merge_ratings_and_weather_data(self, ratings_df: pd.DataFrame, weather_df: pd.DataFrame) -> pd.DataFrame:
         """
@@ -79,8 +96,57 @@ class DataTransformer:
             df["day_of_week"] = df["date"].dt.day_of_week
             df["week"] = df["date"].dt.isocalendar().week
 
+            # Covid features: based on dates from Belgium (when covid got here, when the lockdowns happened)
+            df["covid_19"] = np.where((df["date"] >= "2020-02-04") & (df["date"] <= "2022-03-13"), 1, 0)
+            df["lockdown_1"] = np.where((df["date"] >= "2020-03-13") & (df["date"] <= "2020-06-08"), 1, 0)
+            df["lockdown_2"] = np.where((df["date"] >= "2020-10-30") & (df["date"] <= "2021-04-19"), 1, 0)
+
+            # Ending of program
+            df["end_of_program"] = df["start"] + df["duration"]
+
+            # Start and end of program
+            df["start_of_program_hour"] = df["start"].dt.hour
+            df["end_of_program_hour"] = df["end_of_program"].dt.hour
+
+            # Duration of program (in minutes)
+            df["duration"] = np.round(df["duration"].dt.total_seconds() / 60)
+            df["duration"] = df["duration"].astype(int)
+
+            # Primetime features
+            df["in_primetime"] = np.where((df["start_of_program_hour"] >= 20) & (df["end_of_program_hour"] <= 22), 1, 0)
+            df["ends_in_primetime"] = np.where((df["end_of_program_hour"] >= 20) & (df["end_of_program_hour"] <= 22), 1, 0)
+            df["starts_in_primetime"] = np.where((df["start_of_program_hour"] >= 20) & (df["start_of_program_hour"] <= 22), 1, 0)
+
+            # Does the show have commercials?
+            df["has_commercials"] = np.where(df["channel"].isin(["EEN", "CANVAS", "KETNET", "LA UNE"]), 0, 1)
+
+            # Delta of sunrise and sunset
+            df["sunrise_delta_start"] = df["start_of_program_hour"] - df["sunrise_time"].dt.hour
+            df["sunrise_delta_end"] = df["end_of_program_hour"] - df["sunrise_time"].dt.hour
+            df["sunset_delta_start"] = df["sunset_time"].dt.hour - df["start_of_program_hour"]
+            df["sunset_delta_end"] = df["sunset_time"].dt.hour - df["end_of_program_hour"]
+
+            return df[self.FEATURES_LIST]
+
 
         except Exception as e:
             error_message = f"Error creating new features: {e}"
             logger.error(error_message)
             raise DataProcessingError(error_message) from e
+
+    def select_features(self, data: pd.DataFrame) -> pd.DataFrame:
+        """
+        Select and order features from the data.
+
+        Parameters
+        ----------
+        data : pandas.DataFrame
+            The data to select features from
+
+        Returns
+        -------
+        pandas.DataFrame
+            The data with selected features
+        """
+
+        return data[self.FEATURES_LIST]
