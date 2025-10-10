@@ -15,19 +15,19 @@ def main():
     Main function to collect ratings and weather data and save them to parquet.
     """
     try:        
-        # # Collect ratings data
-        # logger.info("Starting data collection process...")
-        # ratings_df = fetch_ratings_data()
+        # Collect ratings data
+        logger.info("Starting data collection process...")
+        ratings_df = fetch_ratings_data()
         
-        # if ratings_df.empty:
-        #     logger.warning("No data collected, exiting")
-        #     return
+        if ratings_df.empty:
+            logger.warning("No data collected, exiting")
+            return
         
-        # # Save to parquet
-        # output_path = Path("data/ratings_data.parquet")
-        # save_parquet(ratings_df, output_path)
+        # Save to parquet
+        output_path = Path("data/ratings_data.parquet")
+        save_parquet(ratings_df, output_path)
         
-        # logger.info("Data collection and saving completed successfully!")
+        logger.info("Data collection and saving completed successfully!")
 
         # Collect weather data
         logger.info("Starting weather data collection process...")

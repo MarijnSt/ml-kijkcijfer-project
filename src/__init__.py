@@ -17,7 +17,8 @@ from .load import (
 )
 from .transform import (
     RatingsTransformer,
-    WeatherTransformer
+    WeatherTransformer,
+    DataTransformer
 )
 from .utils import (
     DataError,
@@ -45,6 +46,7 @@ __all__ = [
     # Transform
     "RatingsTransformer",
     "WeatherTransformer",
+    "DataTransformer",
     
     # Utils
     "DataError",

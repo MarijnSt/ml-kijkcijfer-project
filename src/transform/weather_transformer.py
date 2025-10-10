@@ -51,8 +51,8 @@ class WeatherTransformer:
             if 'sunset' in df.columns:
                 df["sunset_time"] = pd.to_datetime(df['sunset'], unit='s', utc=True).dt.tz_convert("Europe/Brussels")
 
-            # Remove timezone from date column (used for merge)
-            df["date"] = df["date"].dt.tz_localize(None)
+            # Remove timezone info from date column (used for merge)
+            df["date"] = pd.to_datetime(df["date"].dt.date)
 
             logger.info(f"Weather data formatting complete! Processed {len(df)} records.")
             return df
