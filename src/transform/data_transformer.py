@@ -126,7 +126,11 @@ class DataTransformer:
             df["sunset_delta_start"] = df["sunset_time"].dt.hour - df["start_of_program_hour"]
             df["sunset_delta_end"] = df["sunset_time"].dt.hour - df["end_of_program_hour"]
 
-            return df[self.FEATURES_LIST]
+            # Convert some int to boolean features
+            boolean_features = ["covid_19", "lockdown_1", "lockdown_2", "in_primetime", "ends_in_primetime", "starts_in_primetime", "has_commercials"]
+            df[boolean_features] = df[boolean_features].astype(bool)
+
+            return df
 
 
         except Exception as e:
