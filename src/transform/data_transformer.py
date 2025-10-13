@@ -27,11 +27,14 @@ class DataTransformer:
         "in_primetime", "ends_in_primetime", "starts_in_primetime",
         "has_commercials",
         "sunrise_delta_start", "sunrise_delta_end", "sunset_delta_start", "sunset_delta_end",
-        "sunrise_time", "sunset_time",
         "weather_code", "temperature_2m_mean", "temperature_2m_max", "temperature_2m_min",
         "daylight_duration", "sunshine_duration", 
         "precipitation_sum", "rain_sum", "snowfall_sum", "precipitation_hours", 
         "wind_speed_10m_max", "wind_gusts_10m_max",
+    ]
+
+    BINARY_FEATURES = [
+        "covid_19", "lockdown_1", "lockdown_2", "in_primetime", "ends_in_primetime", "starts_in_primetime", "has_commercials"
     ]
 
     def merge_ratings_and_weather_data(self, ratings_df: pd.DataFrame, weather_df: pd.DataFrame) -> pd.DataFrame:
@@ -126,8 +129,8 @@ class DataTransformer:
             df["sunset_delta_start"] = df["sunset_time"].dt.hour - df["start_of_program_hour"]
             df["sunset_delta_end"] = df["sunset_time"].dt.hour - df["end_of_program_hour"]
 
-            # Convert some int to boolean features
-            boolean_features = ["covid_19", "lockdown_1", "lockdown_2", "in_primetime", "ends_in_primetime", "starts_in_primetime", "has_commercials"]
+            # Convert some int to boolean features (small memory optimization)
+            boolean_features = self.BINARY_FEATURES
             df[boolean_features] = df[boolean_features].astype(bool)
 
             return df
