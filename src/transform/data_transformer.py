@@ -37,6 +37,10 @@ class DataTransformer:
         "covid_19", "lockdown_1", "lockdown_2", "in_primetime", "ends_in_primetime", "starts_in_primetime", "has_commercials"
     ]
 
+    CATEGORICAL_FEATURES = [
+        "year", "month", "day_of_week", "week", "channel", "weather_code"
+    ]
+
     def merge_ratings_and_weather_data(self, ratings_df: pd.DataFrame, weather_df: pd.DataFrame) -> pd.DataFrame:
         """
         Merge ratings and weather data.
